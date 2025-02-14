@@ -9,18 +9,10 @@ This project aims to utilize NASA’s Observational Products for End-Users from 
 
 ## **Introduction**  
 
-
+Glacier surface movement are captured using feature tracking, which gives us how much surface corresponding to each pixel has moved from one time-step to another. Using SAR data for this purpose facilitates us to monitor 3D surface displacements because of its unique way of acquisition. 
 
 ![Geometry ascending descending](asc_des_pair.png)  
 *Figure: Geometric relationship between ascending and descending track products (Panfeng et al., 2020).*
-
-<!-- ICESat-2 supports multiple applications through various data products, with a few listed below:  
-- **ATL03:** Raw photon cloud data  
-- **ATL06:** Land ice elevation (our focus)  
-- **ATL08:** Canopy height and surface classification  
-- **ATL13:** Inland water surface heights  
-
-For more details, see the **[ICESat-2 Data Products](https://icesat-2.gsfc.nasa.gov/science/data-products)**. -->
 
 ## **Problem Statement & Objectives**  
 
@@ -52,12 +44,8 @@ We will leverage multiple tools to process and analyze the data:
 - Tool for performing **time-series analysis of fast moving surface deformations** using OPERA data. 
 - Insights into movement of glaciers on Mt. Baker and Mt. Rainier.
 
-<!-- ## **Related Work**   -->
-<!-- - **[ICESAT-2 HackWeek: Surfit](https://github.com/ICESAT-2HackWeek/surfit)** – Prior work on surface fitting algorithms for ICESat-2. -->
-
 ## **References**   
 - **Samsonov, S. (2021).** *Measuring the state and temporal evolution of glaciers in Alaska and Yukon using synthetic-aperture-radar-derived (SAR-derived) 3D time series of glacier surface flow, The Cryosphere.* [DOI](https://doi.org/10.5194/tc-15-4221-2021).
 - **Lei, Y. (2021).** *Autonomous Repeat Image Feature Tracking (autoRIFT) and Its Application for Tracking Ice Displacement. Remote Sensing*. [DOI](https://doi.org/10.3390/rs13040749).
 
----  
-<!-- ### *Because counting photons is more complicated than it sounds*  🚀❄️ -->
+--- 
