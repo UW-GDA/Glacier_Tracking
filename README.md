@@ -11,7 +11,7 @@ This project aims to utilize NASA’s Observational Products for End-Users from 
 
 Glacier surface movement are captured using feature tracking, which gives us how much surface corresponding to each pixel has moved from one time-step to another. Using SAR data for this purpose facilitates us to monitor 3D surface displacements because of its unique way of acquisition. 
 
-![Geometry ascending descending](asc_des_pair.png)  
+![Geometry ascending descending](./docs/asc_des_pair.png)  
 *Figure: Geometric relationship between ascending and descending track products (Panfeng et al., 2020).*
 
 ## **Problem Statement & Objectives**  
