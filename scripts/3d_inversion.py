@@ -16,6 +16,25 @@ from utils import get_auxiliary_angles
 
 
 def get_timesteps_clean(asc_Daz, des_Daz):
+    '''
+    Function to get the timesteps that are common to both ascending and descending data
+    
+    Parameters
+    ----------
+    asc_Daz: xarray.DataArray
+        Ascending azimuthal displacement data
+    des_Daz: xarray.DataArray
+        Descending azimuthal displacement data
+    
+    Returns
+    -------
+    excl_list_asc: list
+        List of timesteps to exclude from ascending data
+    excl_list_des: list
+        List of timesteps to exclude from descending data
+    timesteps_intersect: list
+        List of timesteps that are common to both ascending and descending data
+    '''
 
     deltaT_gap = (des_Daz.time.values[0] - asc_Daz.time.values[0])
     asc_timesteps = [val + deltaT_gap for val in asc_Daz.time.values]
@@ -28,10 +47,8 @@ def get_timesteps_clean(asc_Daz, des_Daz):
     for excl in timesteps_exclude:
         if excl in asc_timesteps:
             ascT = excl - deltaT_gap
-            # ascT = dt.strftime(ascT, '%Y%m%d')
             excl_list_asc.append(ascT)
         elif excl in des_Daz.time.values:
-            # desT = dt.strftime(excl, '%Y%m%d')
             excl_list_des.append(excl)
             
     return excl_list_asc, excl_list_des, timesteps_intersect
@@ -51,7 +68,7 @@ def clean_data(Daz, Dslrng, excl_list):
     return Daz, Dslrng
 
 def get_timesteps_out(offset_path):
-    asc_filenames = glob(f'{offset_path}/*/2021*.nc')
+    asc_filenames = glob(f'{offset_path}/*/*.nc')
     offset_filenames = sorted([file.split('/')[-1] for file in asc_filenames])
     timesteps = [dt.strptime(val, '%Y%m%d') for val in get_timesteps(offset_filenames)]
     
@@ -68,13 +85,31 @@ def read_offset_data(offset_path):
     Dslrng = Dslrng.assign_coords(band=timesteps[:-1])
     Dslrng = Dslrng.rename({'band':'time'})
 
-    # Coverting descending displacements to velocity [m/yr]
-    Daz = Daz/deltaT.reshape(-1, 1, 1)
-    Dslrng = Dslrng/deltaT.reshape(-1, 1, 1)
+    with xr.set_options(keep_attrs=True):
+        # Coverting descending displacements to velocity [m/yr]
+        Daz = Daz/deltaT.reshape(-1, 1, 1)
+        Dslrng = Dslrng/deltaT.reshape(-1, 1, 1)
     
     return Daz, Dslrng
 
 def compute_3DVel_single_hermet(V_aoro, A):
+    '''
+    Function to compute 3D velocity using Hermitian matrix inversion
+    
+    Parameters
+    ----------
+    V_aoro: numpy.ndarray
+        2D array containing the azimuthal and slant range displacements
+    A: numpy.ndarray
+        2D array containing the design matrix
+        
+    Returns
+    -------
+    v_nev: numpy.ndarray
+        1D array containing the 3D velocity components
+    res: numpy.ndarray
+        1D array containing the residuals
+    '''
     A1, A2 = A[::2], A[1::2]
     b1, b2 = V_aoro[::2], V_aoro[1::2]
     P = np.eye(4)
@@ -107,6 +142,27 @@ def compute_3DVel_single(V_aoro, A):
     return v_nev.reshape(3), res 
 
 def unpacking_chunk(jj, idx_valid_list, A, vel_comb_asc, vel_comb_des):
+    '''
+    Function to unpack the chunk and compute 3D velocities
+    
+    Parameters
+    ----------
+    jj: int
+        Chunk number
+    idx_valid_list: list
+        List of valid indices
+    A: numpy.ndarray
+        Design matrix
+    vel_comb_asc: xarray.DataArray
+        Combined ascending velocity data
+    vel_comb_des: xarray.DataArray
+        Combined descending velocity data
+        
+    Returns
+    -------
+    v_nev: numpy.ndarray
+        3D velocity components
+    '''
     v_nev = np.empty((len(idx_valid_list), len(vel_comb_asc.time.values), 3), dtype=np.float32)
     v_nev.fill(np.nan)
     
@@ -123,6 +179,29 @@ def unpacking_chunk(jj, idx_valid_list, A, vel_comb_asc, vel_comb_des):
     return v_nev
 
 def compute_3DVel_mp(asc_Daz, asc_Dslrng, des_Daz, des_Dslrng, aux_data, chunk_size=1000):
+    '''
+    Function to compute 3D velocities using multiprocessing
+    
+    Parameters
+    ----------
+    asc_Daz: xarray.DataArray
+        Ascending azimuthal displacement data
+    asc_Dslrng: xarray.DataArray
+        Ascending slant range displacement data
+    des_Daz: xarray.DataArray
+        Descending azimuthal displacement data
+    des_Dslrng: xarray.DataArray
+        Descending slant range displacement data
+    aux_data: list
+        List containing the auxiliary data
+    chunk_size: int
+        Number of pixels to process in a single iteration
+        
+    Returns
+    -------
+    vel3d_comb: xarray.Dataset
+        Dataset containing the 3D velocities
+    '''
     A = get_matA_3D(*aux_data)
     # timesteps = asc_Daz.time.values.shape[0]
     vel_comb_asc = xr.concat([asc_Dslrng, asc_Daz], dim='band')
@@ -162,10 +241,11 @@ def main():
     
     parser = argparse.ArgumentParser(description='Inversion of 3D displacements using SBAS')
     parser.add_argument('--datapath', type=str, help='Path to data directory')
+    parser.add_argument('--aoi_wkt', type=str, help='WKT string of Area of Interest')
     args = parser.parse_args()
     
     # Shapely polygon of Area of Interest
-    baker_bounds = shapely.from_wkt('POLYGON((-121.96 48.713,-121.6869 48.713,-121.6869 48.8539,-121.96 48.8539,-121.96 48.713))')
+    baker_bounds = shapely.from_wkt(args.aoi_wkt)
 
     # Get incidence angles for ascending and descending passes
     asc_incid, asc_azim  = get_auxiliary_angles(baker_bounds, 64)

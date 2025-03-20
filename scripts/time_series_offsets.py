@@ -1,5 +1,6 @@
 # Import required packages
 import os
+import argparse
 import numpy as np
 import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
@@ -54,17 +55,23 @@ def select_pairs(scene_list, min_temp_bline, max_temp_bline):
 
 if __name__=="__main__":
     
-    proj_path = '/mnt/Backups/ayushg12/GDA_proj'
+    parser = argparse.ArgumentParser(description='Inversion of 3D displacements using SBAS')
+    parser.add_argument('--glims_path', type=str, help='Path to GLIMS shapefile')
+    parser.add_argument('--aoi_wkt', type=str, help='WKT string of Area of Interest')
+    parser.add_argument('--data_path', type=str, help='Path to OPERA data')
+    args = parser.parse_args()
+
+    proj_path = '../'
     os.makedirs(f'{proj_path}/offsets', exist_ok=True)
     
     # Getting scene lists
-    scene_list_asc = sorted(glob.glob('data/*T064-135608-IW1*'))
-    scene_list_des = sorted(glob.glob('data/*T013-026559-IW1*'))
+    scene_list_asc = sorted(glob.glob(f'{args.data_path}/*T064-135608-IW1*'))
+    scene_list_des = sorted(glob.glob(f'{args.data_path}/*T013-026559-IW1*'))
     
     # Reading GLIMPS shapefiles
-    glimps_gdf = gpd.read_file('/mnt/Backups/ayushg12/GDA_proj/shapefiles/glims_polygons.shp')
-    lats = np.array([-121.96, 48.713,-121.6869, 48.713,-121.6869, 48.8539,-121.96, 48.8539,-121.96, 48.713])[::2]
-    lons = np.array([-121.96, 48.713,-121.6869, 48.713,-121.6869, 48.8539,-121.96, 48.8539,-121.96, 48.713])[1::2]
+    glimps_gdf = gpd.read_file(args.glims_path)
+    lats = np.array([float(pnt.split(' ')[0]) for pnt in args.aoi_wkt[9:-2].split(',')])
+    lons = np.array([float(pnt.split(' ')[1]) for pnt in args.aoi_wkt[9:-2].split(',')])
     bounds = np.array([lats.min(), lons.min(), lats.max(), lons.max()])
     glimps_gdf_aoi = glimps_gdf.clip(bounds)
     

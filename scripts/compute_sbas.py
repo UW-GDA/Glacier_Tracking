@@ -207,7 +207,7 @@ def main():
     lons = np.array([-121.96, 48.713,-121.6869, 48.713,-121.6869, 48.8539,-121.96, 48.8539,-121.96, 48.713])[1::2]
     bounds = np.array([lats.min(), lons.min(), lats.max(), lons.max()])
     
-    offset_files = glob(f'{args.offsets}/deltaT_*/2021*.nc')
+    offset_files = glob(f'{args.offsets}/deltaT_*/*.nc')
     offset_files = [fl for fl in offset_files if fl.split('/')[-2] not in ['deltaT_6', 'deltaT_18', 'deltaT_30']]
     offset_filenames = sorted([file.split('/')[-1] for file in offset_files])
     
