@@ -59,15 +59,45 @@ For running the pipeline from scratch we have provided the environment you would
 
 * **2_analyse_resutls.ipynb**: This notebooks goes through some of the basic analysis we perfomed to understand spatial and temporal variations in glaciers velocities.
 
+Moreover, we have provided some representative samples of the OPERA products used for our region in `data` directory. However we had to convert CSLC values to absolute values and change the file format from h5df to netCDF.
+
 ## **Results**  
 
+We obtained a time-series of glacier velocities which were temporally seperated by 12 days. To analyse the temporal as well as spatial variations we computed their monthly mean as shown in both figures below.
+
 ![Horizontal Velocity](./docs/figures/hor_velocity.png)
+*Figure: Montly mean horizontal velocities [m/yr] for glaciers in Mt. Baker region*
 
 ![Vertical Velocity](./docs/figures/vert_velocity.png)
+*Figure: Montly mean vertical velocities [m/yr] for glaciers in Mt. Baker region*
+
+In the above figures we could observe that we have very high glacier velocities in months of November and December, which is not realistic as those are the month when snow is accumulating on glaciers. And usually glacier flow happens when snow/glaciers is melting and the meltwater from that makes the glaciers slide. We are most likely observations such erroneous observations for the months of November and Decemeber, as during those months a lot of snow accumulation takes place on those regions which hides all the features affecting the performance of feature tracking. Moreover, these glaciers are clean and don't have a lot of debris on them, thus we don't have much features to track when all the terrain of glaciers is covered by snow. Except those few winter months, we observe an increase in velocity for May, July and August, which is happening due to the melting that is happening during those Summer months.
+
+To further understand the spatial variation in glacier velocity we plot a 3D visualisation of glacier velocity and their flow directions as shown in figures below.
 
 ![Spatial Hor Velocity](./docs/figures/D_hor.png)
+*Figure: Horizontal velocity of Coleman glacier regions with flow directions*
 
 ![Spatial Vert Velocity](./docs/figures/D_vert.png)
+*Figure: Vertical velocity of Coleman glacier regions with flow directions*
+
+In both the figures above we can observe that flow directions look realistic, showing the movement of glaciers from higher elevation to lower elevations. Additionally, we can also observe negative vertical velocities in steep regions of terrain, moreover we observe higher horizontal velocities for those steep regions as well. This spatial variation is most likely due to higher higher force of gravity acting on those steep regions compared to more planar regions.
+
+
+## **Conclusions**
+
+* Velocities for november, december and january have a lot of noise, which might be due to dense snow cover on Mt. Baker.
+    - Western US have wet snow which might be affecting the SAR backscatters.
+* Vertical velocities are higher in steep regions.
+* It is difficult to monitor clean glaciers using offset tracking.
+
+
+## **Future work**
+
+* Investigate further the reason for noisy data in winter months.
+* Process data for a longer period of time to understand is seasonal variations are captured.
+* Incorporate data from other sensors like optical data in the 3D velocity computation step.
+
 
 ## **References**   
 - **Samsonov, S. (2021).** *Measuring the state and temporal evolution of glaciers in Alaska and Yukon using synthetic-aperture-radar-derived (SAR-derived) 3D time series of glacier surface flow, The Cryosphere.* [DOI](https://doi.org/10.5194/tc-15-4221-2021).
